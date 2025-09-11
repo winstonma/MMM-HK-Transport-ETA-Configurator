@@ -1,0 +1,21 @@
+{
+	"LINE": "Line",
+	"DESTINATION": "Destination",
+	"DEPARTURE": "Departure",
+	"pageTitle": "MMM-HK-Transport-ETA Configuration",
+	"pageDescription": "To configure the module, modify the settings using the form, and then copy the updated JSON back into your <code>config.json</code> file in the module directory.",
+	"labelTransportETAProvider": "Transport ETA Provider:",
+	"labelMtrLine": "MTR Line:",
+	"labelMtrStation": "MTR Station:",
+	"labelSta": "Station/Stop ID:",
+	"labelKmbRoute": "KMB Route:",
+	"labelKmbDirection": "Direction:",
+	"labelKmbStop": "Stop:",
+	"labelReloadInterval": "Reload Interval (minutes):",
+	"labelUpdateInterval": "Update Interval (seconds):",
+	"labelAnimationSpeed": "Animation Speed (milliseconds):",
+	"labelInitialLoadDelay": "Initial Load Delay (milliseconds):",
+	"labelJsonOutput": "Copy updated config.json content from here:",
+	"advancedSettingsText": "Advanced Settings",
+	"errorFetchingKmbRoutes": "Error fetching KMB routes"
+}

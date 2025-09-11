@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+/* Copy icon styling */
+.json-output-container {
+	position: relative;
+}
+
+.copy-icon {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	color: #6b7280;
+	font-size: 16px;
+	cursor: pointer;
+	padding: 4px;
+	border-radius: 4px;
+	transition: all 0.2s ease;
+	background-color: rgba(255, 255, 255, 0.9);
+	border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.copy-icon:hover {
+	color: #374151;
+	background-color: rgba(255, 255, 255, 1);
+	transform: scale(1.1);
+}
+
+.copy-icon:active {
+	transform: scale(0.95);
+}
+
+/* Message container styling */
+.message-container {
+	position: relative;
+}

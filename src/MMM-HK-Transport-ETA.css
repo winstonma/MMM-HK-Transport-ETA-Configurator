@@ -1,0 +1,131 @@
+/* Admin Configuration Page Styles */
+body {
+	line-height: 1.6;
+	margin: 0;
+	padding: 20px;
+	background-color: #f8f9fa;
+}
+
+.language-selector {
+	text-align: right;
+	margin-bottom: 20px;
+}
+
+h1 {
+	color: #333;
+	margin-bottom: 10px;
+}
+
+p {
+	color: #666;
+	margin-bottom: 30px;
+}
+
+code {
+	background: #f1f3f4;
+	padding: 2px 6px;
+	border-radius: 3px;
+	font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+}
+
+.form-group {
+	margin-bottom: 20px;
+}
+
+label {
+	display: block;
+	margin-bottom: 5px;
+	font-weight: 600;
+	color: #333;
+}
+
+/* Advanced Settings Toggle */
+.advanced-settings-toggle {
+	background: #f8f9fa;
+	border: 1px solid #dee2e6;
+	border-radius: 6px;
+	padding: 15px;
+	margin: 20px 0;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.advanced-settings-toggle:hover {
+	background: #e9ecef;
+	border-color: #adb5bd;
+}
+
+.advanced-settings-toggle span {
+	font-weight: 600;
+	color: #495057;
+}
+
+.advanced-settings-toggle i {
+	color: #6c757d;
+	transition: transform 0.3s ease;
+}
+
+/* Advanced Settings Content */
+#advancedSettings {
+	background: #f8f9fa;
+	border: 1px solid #dee2e6;
+	border-radius: 6px;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+#advancedSettings .form-group:last-child {
+	margin-bottom: 0;
+}
+
+/* JSON Output */
+.json-output-container {
+	position: relative;
+}
+
+#jsonOutput {
+	font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+	font-size: 14px;
+	line-height: 1.4;
+	resize: vertical;
+}
+
+.copy-icon {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	cursor: pointer;
+	color: #6c757d;
+	font-size: 18px;
+	transition: color 0.3s ease;
+}
+
+.copy-icon:hover {
+	color: #007bff;
+}
+
+/* Messages */
+#message {
+	padding: 15px;
+	border-radius: 4px;
+	margin-top: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.language-selector {
+		text-align: center;
+	}
+}
+
+/* Animation for toggle icon */
+.fa-chevron-down {
+	transform: rotate(0deg);
+}
+
+.fa-chevron-up {
+	transform: rotate(180deg);
+}

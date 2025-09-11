@@ -1,0 +1,32 @@
+---
+// This is the Astro page for the admin UI.
+// It replaces the original config.html.
+import Layout from "../layouts/Layout.astro";
+import TransportConfigForm from "../components/TransportConfigForm.svelte";
+
+// Default configuration (should match MMM-HK-Transport-ETA.js defaults)
+const defaultModuleConfig = {
+  transportETAProvider: "mtr",
+  sta: "HOK",
+  reloadInterval: 60000, // ms
+  updateInterval: 5000, // ms
+  animationSpeed: 2500,
+  initialLoadDelay: 0,
+  colored: false,
+  showHeader: false,
+};
+---
+
+<Layout title="MMM-HK-Transport-ETA Configuration">
+  <TransportConfigForm initialConfig={defaultModuleConfig} client:load />
+
+  <!-- Keep provider scripts for API functionality -->
+  <script type="module" src="/scripts/main.js"></script>
+  <script type="module" src="/scripts/providers/nwfb.js"></script>
+  <script type="module" src="/scripts/providers/mtrbus.js"></script>
+  <script type="module" src="/scripts/providers/lrt.js"></script>
+  <script type="module" src="/scripts/providers/ctb.js"></script>
+  <script type="module" src="/scripts/providers/gmb.js"></script>
+  <script type="module" src="/scripts/providers/mtr.js"></script>
+  <script type="module" src="/scripts/providers/kmb.js"></script>
+</Layout>
