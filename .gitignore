@@ -38,3 +38,4 @@ Thumbs.db
 
 # Public external data
 /public/external
+/public/scripts/providers
