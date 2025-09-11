@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import svelte from "@astrojs/svelte";
 // https://astro.build/config
 export default defineConfig({
+	base: '/MMM-HK-Transport-ETA-Configurator/',
 	publicDir: "./public",
 	outDir: "./dist",
 	integrations: [svelte()],
