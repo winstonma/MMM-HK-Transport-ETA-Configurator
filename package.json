@@ -4,9 +4,9 @@
 	"version": "0.0.1",
 	"scripts": {
 		
-		"predev": "./scripts/download-mtr-lines.sh",
+		"predev": "./scripts/download-data.sh && ./scripts/download-providers.sh",
 		"dev": "astro dev",
-		"prebuild": "./scripts/download-mtr-lines.sh",
+		"prebuild": "./scripts/download-data.sh && ./scripts/download-providers.sh",
 		"build": "astro build",
 		"preview": "astro preview",
 		"astro": "astro",
