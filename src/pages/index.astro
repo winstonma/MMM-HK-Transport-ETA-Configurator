@@ -21,12 +21,12 @@ const defaultModuleConfig = {
   <TransportConfigForm initialConfig={defaultModuleConfig} client:load />
 
   <!-- Keep provider scripts for API functionality -->
-  <script type="module" src={import.meta.env.BASE_URL + "scripts/main.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "scripts/providers/nwfb.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "scripts/providers/mtrbus.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "scripts/providers/lrt.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "scripts/providers/ctb.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "scripts/providers/gmb.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "scripts/providers/mtr.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "scripts/providers/kmb.js"}></script>
+  <script type="module" src={import.meta.env.BASE_URL + "main.js"}></script>
+  <script type="module" src={import.meta.env.BASE_URL + "external/providers/nwfb.js"}></script>
+  <script type="module" src={import.meta.env.BASE_URL + "external/providers/mtrbus.js"}></script>
+  <script type="module" src={import.meta.env.BASE_URL + "external/providers/lrt.js"}></script>
+  <script type="module" src={import.meta.env.BASE_URL + "external/providers/ctb.js"}></script>
+  <script type="module" src={import.meta.env.BASE_URL + "external/providers/gmb.js"}></script>
+  <script type="module" src={import.meta.env.BASE_URL + "external/providers/mtr.js"}></script>
+  <script type="module" src={import.meta.env.BASE_URL + "external/providers/kmb.js"}></script>
 </Layout>

@@ -53,7 +53,7 @@ export class DataService {
 		}
 
 		try {
-			const response = await fetch(`${import.meta.env.BASE_URL}external/mtr-lines.json`);
+			const response = await fetch(`${import.meta.env.BASE_URL}external/data/mtr-lines.json`);
 			if (response.ok) {
 				const mtrLinesData = await response.json();
 				this.cache.set(cacheKey, mtrLinesData);
@@ -144,14 +144,7 @@ export class DataService {
 	}
 
 	async initializeHKTransportETAProvider() {
-		// Load the provider scripts if not already loaded
-		const scripts = ["/scripts/main.js", "/scripts/providers/kmb.js"];
-
-		for (const scriptSrc of scripts) {
-			if (!document.querySelector(`script[src="${scriptSrc}"]`)) {
-				await this.loadScript(scriptSrc);
-			}
-		}
+		
 
 		// Fallback mock if providers don't load
 		if (!window.HKTransportETAProvider) {
@@ -167,16 +160,7 @@ export class DataService {
 		}
 	}
 
-	loadScript(src) {
-		return new Promise((resolve, reject) => {
-			const script = document.createElement("script");
-			script.type = "module";
-			script.src = src;
-			script.onload = resolve;
-			script.onerror = reject;
-			document.head.appendChild(script);
-		});
-	}
+	
 
 	clearCache() {
 		this.cache.clear();
