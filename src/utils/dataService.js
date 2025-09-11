@@ -11,7 +11,7 @@ export class DataService {
 		}
 
 		try {
-			const response = await fetch(`/${lang}.json`);
+			const response = await fetch(`${import.meta.env.BASE_URL}${lang}.json`);
 			if (response.ok) {
 				const translations = await response.json();
 				this.cache.set(cacheKey, translations);
@@ -53,7 +53,7 @@ export class DataService {
 		}
 
 		try {
-			const response = await fetch("/external/mtr-lines.json");
+			const response = await fetch(`${import.meta.env.BASE_URL}external/mtr-lines.json`);
 			if (response.ok) {
 				const mtrLinesData = await response.json();
 				this.cache.set(cacheKey, mtrLinesData);
