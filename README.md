@@ -1,34 +1,67 @@
-# Astro Starter Kit: Basics
+# MMM-HK-Transport-ETA-Configurator
 
-```sh
-npm create astro@latest -- --template basics
+This project is a configurator for the MMM-HK-Transport-ETA MagicMirror module, built with Astro and Svelte.
+
+## Project Structure
+
+This project follows a standard Astro project structure. Key files and directories include:
+
+- `src/`: Contains Astro pages, Svelte components, styles, and utilities.
+- `public/`: Static assets, including external data and scripts.
+- `astro.config.mjs`: Astro configuration, including the base path for deployment.
+- `.github/workflows/deploy.yml`: GitHub Actions workflow for deployment to GitHub Pages.
+
+## Configuration
+
+### Astro Configuration
+
+The `astro.config.mjs` file has been updated to include a `base` path for deployment to GitHub Pages. This ensures correct asset loading when hosted in a sub-directory.
+
+```javascript
+export default defineConfig({
+	base: '/MMM-HK-Transport-ETA-Configurator/',
+	// ... other configurations
+});
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+### Git Ignore
 
-## 🚀 Project Structure
+The `.gitignore` file has been updated to exclude generated files and specific public directories:
 
-Inside of your Astro project, you'll see the following folders and files:
+- `/dist`
+- `/.astro`
+- `/node_modules`
+- `/pnpm-lock.yaml`
+- `/package-lock.json`
+- `/public/external`
+- `/public/scripts/providers`
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+## Deployment
+
+This project uses GitHub Actions to deploy to GitHub Pages. The workflow is defined in `.github/workflows/deploy.yml`.
+
+### GitHub Actions Permissions
+
+To ensure the GitHub Actions bot has the necessary permissions to push to the `gh-pages` branch, the `deploy.yml` workflow includes `permissions: contents: write`:
+
+```yaml
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  # ...
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+### GitHub Pages Settings
 
-## 🧞 Commands
+After a successful build, ensure your repository's GitHub Pages settings are configured to deploy from **GitHub Actions**.
+
+## Commands
 
 All commands are run from the root of the project, from a terminal:
 
@@ -41,6 +74,6 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
-## 👀 Want to learn more?
+## Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
