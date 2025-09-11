@@ -3,37 +3,39 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main
-
-permissions:
-  contents: write
+      - gh-pages # Trigger on pushes to the gh-pages branch
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20' # Use a recent Node.js version
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile # Use pnpm as per pnpm-lock.yaml
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          version: 8
-          run_install: true
-
-      - name: Build Astro project
-        run: pnpm build
+          path: ./dist # The directory where Astro builds its output
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          # Keep the history of the gh-pages branch
-          force_orphan: false
+        id: deployment
+        uses: actions/deploy-pages@v4
