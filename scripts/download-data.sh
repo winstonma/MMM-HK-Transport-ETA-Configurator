@@ -6,9 +6,17 @@ mkdir -p public/external/data
 
 echo "Downloading data files..."
 
-# Download mtr-lines.json
-echo "  Downloading mtr-lines.json..."
-curl -o public/external/data/mtr-lines.json https://raw.githubusercontent.com/winstonma/MMM-HK-Transport-ETA/refs/heads/main/data/mtr-lines.json
+
+FILES=(
+  "mtr-lines.json"
+  "routes-mtr.json"
+  "station-lrt.json"
+)
+
+for file in "${FILES[@]}"; do
+  echo "  Downloading $file..."
+  curl -o "public/external/data/$file" "https://raw.githubusercontent.com/winstonma/MMM-HK-Transport-ETA/refs/heads/main/data/$file"
+done
 
 
 

@@ -16,8 +16,18 @@ done
 
 # Patch downloaded files with correct paths
 echo "Patching downloaded files..."
-sed -i 's|"/modules/MMM-HK-Transport-ETA/data/mtr-lines.json"|"/external/data/mtr-lines.json"|' public/external/providers/mtr.js
-sed -i 's|"/modules/MMM-HK-Transport-ETA/telegram-hketa/data/station-lrt.json"|"/external/station-lrt.json"|' public/external/providers/lrt.js
-sed -i 's|"/modules/MMM-HK-Transport-ETA/telegram-hketa/data/routes-mtr.json"|"/external/routes-mtr.json"|' public/external/providers/mtrbus.js
+# Patch definitions: target_file|old_string|new_string
+PATCHES=(
+  "mtr.js|"/modules/MMM-HK-Transport-ETA/data/mtr-lines.json"|"/external/data/mtr-lines.json""
+  "lrt.js|"/modules/MMM-HK-Transport-ETA/telegram-hketa/data/station-lrt.json"|"/external/station-lrt.json""
+  "mtrbus.js|"/modules/MMM-HK-Transport-ETA/telegram-hketa/data/routes-mtr.json"|"/external/routes-mtr.json""
+)
+
+echo "Patching downloaded files..."
+for patch_def in "${PATCHES[@]}"; do
+  IFS='|' read -r target_file old_str new_str <<< "$patch_def"
+  echo "  Patching $target_file..."
+  sed -i "s|$old_str|$new_str|" "public/external/providers/$target_file"
+done
 
 echo "Provider scripts downloaded and patched successfully."
