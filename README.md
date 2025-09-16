@@ -38,28 +38,35 @@ The `.gitignore` file has been updated to exclude generated files and specific p
 
 ## Deployment
 
-This project uses GitHub Actions to deploy to GitHub Pages. The workflow is defined in `.github/workflows/deploy.yml`.
+This project is already configured for automatic deployment to GitHub Pages using GitHub Actions.
 
-### GitHub Actions Permissions
+### GitHub Actions (Recommended)
 
-To ensure the GitHub Actions bot has the necessary permissions to push to the `gh-pages` branch, the `deploy.yml` workflow includes `permissions: contents: write`:
+The project uses GitHub Actions to automatically deploy to GitHub Pages. The workflow is defined in `.github/workflows/static.yml`. This is the recommended deployment method because:
 
-```yaml
-on:
-  push:
-    branches:
-      - main
+- It's more secure (no personal access tokens required)
+- It's automatic (deploys on every push to main branch)
+- It's reliable (uses official GitHub Pages actions)
 
-permissions:
-  contents: write
+The workflow already:
 
-jobs:
-  # ...
-```
+- Uses pnpm to install dependencies
+- Downloads the necessary data and provider scripts
+- Builds the site using `pnpm run build`
+- Deploys to GitHub Pages using the official GitHub Actions
 
-### GitHub Pages Settings
+#### GitHub Pages Settings
 
 After a successful build, ensure your repository's GitHub Pages settings are configured to deploy from **GitHub Actions**.
+
+### Manual Deployment with gh-pages (Alternative)
+
+As an alternative, you can manually deploy to GitHub Pages using the gh-pages package:
+
+1. Run `pnpm run deploy` to build and deploy your site
+2. Your site will be available at `https://[your-username].github.io/MMM-HK-Transport-ETA-Configurator/`
+
+Note: For manual deployment, you'll need to configure a personal access token with proper permissions in your repository settings.
 
 ## Commands
 
@@ -73,6 +80,7 @@ All commands are run from the root of the project, from a terminal:
 | `npm run preview`         | Preview your build locally, before deploying     |
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
+| `npm run deploy`          | Deploy your site to GitHub Pages                 |
 
 ## Want to learn more?
 
