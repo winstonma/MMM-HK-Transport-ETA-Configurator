@@ -60,11 +60,6 @@ export class DataService {
 					? import.meta.env.BASE_URL
 					: '/';
 
-			// Fix for build-time URL issues
-			if (baseUrl.includes('MMM-HK-Transport-ETA-Configurator')) {
-				baseUrl = '/';
-			}
-
 			const response = await fetch(`${baseUrl}external/data/mtr-lines.json`);
 			if (response.ok) {
 				const mtrLinesData = await response.json();
@@ -92,11 +87,6 @@ export class DataService {
 				import.meta.env.BASE_URL
 					? import.meta.env.BASE_URL
 					: '/';
-
-			// Fix for build-time URL issues
-			if (baseUrl.includes('MMM-HK-Transport-ETA-Configurator')) {
-				baseUrl = '/';
-			}
 
 			const response = await fetch(`${baseUrl}external/data/routes-mtr.json`);
 			if (response.ok) {

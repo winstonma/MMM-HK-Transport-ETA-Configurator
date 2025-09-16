@@ -15,13 +15,13 @@ for provider in "${PROVIDERS[@]}"; do
   curl -o "public/external/providers/$provider" "https://raw.githubusercontent.com/winstonma/MMM-HK-Transport-ETA/refs/heads/main/providers/$provider"
 done
 
-# Patch downloaded files with correct paths
+# Patch downloaded files with correct paths for GitHub Pages
 echo "Patching downloaded files..."
 # Patch definitions: target_file|old_string|new_string
 PATCHES=(
-  "mtr.js|\"/modules/MMM-HK-Transport-ETA/data/mtr-lines.json\"|\"/external/data/mtr-lines.json\""
-  "lrt.js|\"/modules/MMM-HK-Transport-ETA/telegram-hketa/data/station-lrt.json\"|\"/external/data/station-lrt.json\""
-  "mtrbus.js|\"/modules/MMM-HK-Transport-ETA/telegram-hketa/data/routes-mtr.json\"|\"/external/data/routes-mtr.json\""
+  "mtr.js|\"/modules/MMM-HK-Transport-ETA/data/mtr-lines.json\"|\"/MMM-HK-Transport-ETA-Configurator/external/data/mtr-lines.json\""
+  "lrt.js|\"/modules/MMM-HK-Transport-ETA/telegram-hketa/data/station-lrt.json\"|\"/MMM-HK-Transport-ETA-Configurator/external/data/station-lrt.json\""
+  "mtrbus.js|\"/modules/MMM-HK-Transport-ETA/telegram-hketa/data/routes-mtr.json\"|\"/MMM-HK-Transport-ETA-Configurator/external/data/routes-mtr.json\""
 )
 
 echo "Patching downloaded files..."
