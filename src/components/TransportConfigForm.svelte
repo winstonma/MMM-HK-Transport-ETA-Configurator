@@ -2,14 +2,19 @@
   import { onMount } from 'svelte';
   import KmbConfigForm from './KmbConfigForm.svelte';
   import MtrConfigForm from './MtrConfigForm.svelte';
+  import MtrbusConfigForm from './MtrbusConfigForm.svelte';
+  import CtbConfigForm from './CtbConfigForm.svelte';
   import Toast from './Toast.svelte';
   import { dataService } from '../utils/dataService.js';
   import { 
-    config, 
-    translations, 
-    mtrLinesData, 
-    kmbRoutesData, 
+    config,
+    translations,
+    mtrLinesData,
+    kmbRoutesData,
     kmbRouteStopData,
+    mtrbusRoutesData,
+    ctbRoutesData,
+    ctbRouteStopsData,
     loading,
     error,
     showAdvanced,
@@ -47,6 +52,12 @@
         const kmbData = await dataService.loadKmbData();
         kmbRoutesData.set(kmbData.kmbRoutesData);
         kmbRouteStopData.set(kmbData.kmbRouteStopData);
+      } else if ($config.transportETAProvider === "mtrbus") {
+        const mtrbusData = await dataService.loadMtrbusRoutesData();
+        mtrbusRoutesData.set(mtrbusData);
+      } else if ($config.transportETAProvider === "ctb") {
+        const ctbData = await dataService.loadCtbData();
+        ctbRoutesData.set(ctbData.ctbRoutesData);
       }
     } catch (err) {
       error.set(`Failed to load initial data: ${err.message}`);
@@ -65,6 +76,10 @@
   async function handleProviderChange() {
     // Reset sta when provider changes
     updateConfig({ sta: "" });
+    // Clear CTB route stops data if provider changes from CTB or to CTB
+    if ($config.transportETAProvider !== "ctb") {
+      ctbRouteStopsData.set([]);
+    }
     
     // Load provider-specific data
     if ($config.transportETAProvider === "kmb" && Object.keys($kmbRoutesData).length === 0) {
@@ -78,8 +93,30 @@
       } finally {
         loading.set(false);
       }
+    } else if ($config.transportETAProvider === "mtrbus" && Object.keys($mtrbusRoutesData).length === 0) {
+      loading.set(true);
+      try {
+        const mtrbusData = await dataService.loadMtrbusRoutesData();
+        mtrbusRoutesData.set(mtrbusData);
+      } catch (err) {
+        error.set(`Failed to load MTR Bus data: ${err.message}`);
+      } finally {
+        loading.set(false);
+      }
+    } else if ($config.transportETAProvider === "ctb" && Object.keys($ctbRoutesData).length === 0) {
+      loading.set(true);
+      try {
+        const ctbData = await dataService.loadCtbData();
+        ctbRoutesData.set(ctbData.ctbRoutesData);
+      } catch (err) {
+        error.set(`Failed to load CTB data: ${err.message}`);
+      } finally {
+        loading.set(false);
+      }
     }
   }
+  
+  
   
   async function copyToClipboard() {
     if ($jsonOutput) {
@@ -141,6 +178,8 @@
       >
         <option value="kmb">KMB</option>
         <option value="mtr">MTR</option>
+        <option value="mtrbus">MTR Bus</option>
+        <option value="ctb">CTB</option>
       </select>
     </div>
 
@@ -160,6 +199,32 @@
         translations={$translations}
         currentLanguage="en"
         on:configChange={(e) => updateConfig(e.detail)}
+      />
+    {:else if $config.transportETAProvider === "mtrbus"}
+      <MtrbusConfigForm
+        config={$config}
+        translations={$translations}
+        mtrbusRoutesData={$mtrbusRoutesData}
+        on:configChange={(e) => updateConfig(e.detail)}
+      />
+    {:else if $config.transportETAProvider === "ctb"}
+      <CtbConfigForm
+        config={$config}
+        ctbRoutesData={$ctbRoutesData}
+        ctbRouteStopsData={$ctbRouteStopsData}
+        translations={$translations}
+        currentLanguage="en"
+        on:configChange={(e) => updateConfig(e.detail)}
+        on:routeSelected={(e) => {
+          const selectedRoute = e.detail.route;
+          if (selectedRoute) {
+            loading.set(true);
+            dataService.loadCtbRouteStopsData(selectedRoute)
+              .then(data => ctbRouteStopsData.set(data))
+              .catch(err => error.set(`Failed to load CTB route stops data: ${err.message}`))
+              .finally(() => loading.set(false));
+          }
+        }}
       />
     {:else}
       <!-- Manual STA input -->

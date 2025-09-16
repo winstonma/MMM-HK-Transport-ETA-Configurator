@@ -1,7 +1,7 @@
 // Minimal main.js - most functionality moved to Svelte components and DataService
 
 // Basic Log utility for compatibility
-if (typeof Log === "undefined") {
+if (typeof Log === 'undefined') {
 	window.Log = {
 		info: console.log.bind(console),
 		log: console.log.bind(console),
@@ -18,12 +18,32 @@ window.HKTransportETAProvider = {
 		this.providers[providerName] = initializer;
 	},
 	initialize(providerName, config) {
-		return {
-			config: {
-				apiBase: "https://data.etabus.gov.hk/v1/transport/kmb",
-				...config,
-			},
-			fetchData: async (url) => fetch(url),
+		const provider = this.providers[providerName];
+		if (!provider) {
+			Log.error(`Provider ${providerName} not registered.`);
+			return null;
+		}
+
+		// Merge default config with provided config
+		const mergedConfig = { ...provider.defaults, ...config };
+
+		const providerInstance = {};
+		providerInstance.config = mergedConfig;
+		providerInstance.fetchData = async url => {
+			const response = await fetch(url);
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
+			return response.json();
 		};
+
+		// Bind all original provider methods to this instance
+		Object.keys(provider)
+			.filter(key => typeof provider[key] === 'function')
+			.forEach(key => {
+				providerInstance[key] = provider[key].bind(providerInstance);
+			});
+
+		return providerInstance;
 	},
 };
