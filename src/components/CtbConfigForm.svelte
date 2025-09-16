@@ -7,7 +7,7 @@
   export let ctbRoutesData = [];
   export let ctbRouteStopsData = [];
   export let translations = {};
-  
+  export let currentLanguage = 'en'; // Use currentLanguage prop to match other components
 
   let selectedRoute = "";
   let selectedDirection = "";
@@ -62,8 +62,14 @@
         .filter(stop => stop.route === selectedRoute && stop.direction === selectedDirection)
         .sort((a, b) => parseInt(a.seq) - parseInt(b.seq))
         .map(stop => {
-          // Use detailed stop information if available, otherwise fall back to basic info
-          const stopName = stop.details?.name_en || stop.name_en || `Stop ${stop.stop}`;
+          // Use the appropriate language field for stop names
+          let stopName = stop.name_en || stop.name_tc || stop.name_sc || stop.stop_name || `Stop ${stop.stop}`;
+          if (currentLanguage === 'tc') {
+            stopName = stop.name_tc || stop.name_en || stop.name_sc || stop.stop_name || `Stop ${stop.stop}`;
+          } else if (currentLanguage === 'sc') {
+            stopName = stop.name_sc || stop.name_en || stop.name_tc || stop.stop_name || `Stop ${stop.stop}`;
+          }
+          
           return { 
             value: stop.stop, 
             text: `${stop.seq}. ${stopName}`, 
@@ -115,11 +121,11 @@
       const newSta = `${selectedRoute}-${selectedDirection}-${selectedStop}`;
 
       if (config.sta !== newSta) {
-        dispatch('configChange', { sta: newSta });
+        dispatch('configChange', { sta: newSta, lang: currentLanguage }); // Pass language to parent
       }
     } else if (config.sta !== selectedRoute && selectedRoute && !selectedDirection && !selectedStop) {
       // If only route is selected, update config.sta to just the route
-      dispatch('configChange', { sta: selectedRoute });
+      dispatch('configChange', { sta: selectedRoute, lang: currentLanguage }); // Pass language to parent
     }
   }
 </script>
