@@ -117,15 +117,12 @@ export class DataService {
 				apiBase: 'https://rt.data.gov.hk/v2/transport/citybus',
 			});
 
-			const routeStopsData = (await ctbProvider.fetchRouteStops(route)) || [];
+			const routeStopsData = (await ctbProvider.fetchRouteStopsWithNames(route)) || [];
 
 			this.cache.set(cacheKey, routeStopsData);
 			return routeStopsData;
 		} catch (error) {
-			console.error(
-				`Error fetching CTB route stops for route ${route}:`,
-				error
-			);
+			console.error(`Error fetching CTB route stops for route ${route}:`, error);
 			throw new Error(`Failed to load CTB route stops data: ${error.message}`);
 		}
 	}
@@ -278,14 +275,13 @@ export class DataService {
 				initialize: (provider, config) => {
 					const mockProvider = {
 						config: {
-							apiBase: 'https://data.etabus.gov.hk/v1/transport/kmb',
 							...config,
 						},
 						fetchData: async url => fetch(url),
 						fetchRoutes: async () => {
 							/* mock implementation */ return [];
 						},
-						fetchRouteStops: async route => {
+						fetchRouteStopsWithNames: async route => {
 							/* mock implementation */ return [];
 						},
 					};
