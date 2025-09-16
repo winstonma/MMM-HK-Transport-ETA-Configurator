@@ -3,6 +3,7 @@ set -e
 
 # Create necessary directories if they don't exist
 mkdir -p public/external/providers
+mkdir -p public/external/data
 
 # List of provider scripts to download
 PROVIDERS=("ctb.js" "gmb.js" "kmb.js" "lrt.js" "mtr.js" "mtrbus.js" "nwfb.js")
@@ -18,9 +19,9 @@ done
 echo "Patching downloaded files..."
 # Patch definitions: target_file|old_string|new_string
 PATCHES=(
-  "mtr.js|"/modules/MMM-HK-Transport-ETA/data/mtr-lines.json"|"/external/data/mtr-lines.json""
-  "lrt.js|"/modules/MMM-HK-Transport-ETA/telegram-hketa/data/station-lrt.json"|"/external/station-lrt.json""
-  "mtrbus.js|"/modules/MMM-HK-Transport-ETA/telegram-hketa/data/routes-mtr.json"|"/external/routes-mtr.json""
+  "mtr.js|\"/modules/MMM-HK-Transport-ETA/data/mtr-lines.json\"|\"/external/data/mtr-lines.json\""
+  "lrt.js|\"/modules/MMM-HK-Transport-ETA/telegram-hketa/data/station-lrt.json\"|\"/external/data/station-lrt.json\""
+  "mtrbus.js|\"/modules/MMM-HK-Transport-ETA/telegram-hketa/data/routes-mtr.json\"|\"/external/data/routes-mtr.json\""
 )
 
 echo "Patching downloaded files..."

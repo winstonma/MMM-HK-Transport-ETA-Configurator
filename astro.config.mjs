@@ -5,11 +5,7 @@ import svelte from '@astrojs/svelte';
 
 // https://astro.build/config
 export default defineConfig({
-	// Only use base path for production builds (GitHub Pages)
-	base:
-		process.env.NODE_ENV === 'production'
-			? '/MMM-HK-Transport-ETA-Configurator/'
-			: '/',
+	base: '/',
 	publicDir: './public',
 	outDir: './dist',
 	integrations: [svelte()],
