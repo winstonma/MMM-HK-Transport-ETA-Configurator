@@ -11,9 +11,7 @@
 		"astro": "astro",
 		"clean": "rm -rf dist public/external",
 		"format": "prettier --write .",
-		"format:check": "prettier --check .",
-		"deploy": "gh-pages -d dist -m \"Deploy to GitHub Pages\"",
-		"predeploy": "pnpm run build"
+		"format:check": "prettier --check ."
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-free": "^7.0.1",
@@ -24,7 +22,6 @@
 	"devDependencies": {
 		"@astro-github-elements/clipboard-copy": "^0.0.4",
 		"@astrojs/svelte": "^7.1.1",
-		"gh-pages": "^6.3.0",
 		"prettier": "^3.6.2",
 		"prettier-plugin-astro": "^0.14.1",
 		"prettier-plugin-svelte": "^3.2.8",
