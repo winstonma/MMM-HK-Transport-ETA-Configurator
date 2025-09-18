@@ -113,9 +113,7 @@ export class DataService {
 				await this.initializeHKTransportETAProvider();
 			}
 
-			const ctbProvider = window.HKTransportETAProvider.initialize('ctb', {
-				apiBase: 'https://rt.data.gov.hk/v2/transport/citybus',
-			});
+			const ctbProvider = window.HKTransportETAProvider.initialize('ctb', {});
 
 			const routeStopsData =
 				(await ctbProvider.fetchRouteStopsWithNames(route)) || [];
@@ -254,9 +252,7 @@ export class DataService {
 				await this.initializeHKTransportETAProvider();
 			}
 
-			const ctbProvider = window.HKTransportETAProvider.initialize('ctb', {
-				apiBase: 'https://rt.data.gov.hk/v2/transport/citybus',
-			});
+			const ctbProvider = window.HKTransportETAProvider.initialize('ctb', {});
 
 			const ctbRoutesData = (await ctbProvider.fetchRoutes()) || [];
 
