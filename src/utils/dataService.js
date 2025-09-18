@@ -135,80 +135,46 @@ export class DataService {
 			return this.cache.get(cacheKey);
 		}
 
-		// Add retry logic
-		const fetchWithRetry = async (fetchFn, retries = 3) => {
-			for (let i = 0; i < retries; i++) {
-				try {
-					return await fetchFn();
-				} catch (error) {
-					const errorMessage = error.message || error.toString();
-					console.warn(`KMB data fetch attempt ${i + 1} failed:`, errorMessage);
-					if (i === retries - 1) throw error;
-					// Wait before retry with exponential backoff
-					await new Promise(resolve =>
-						setTimeout(resolve, 1000 * Math.pow(2, i))
-					);
-				}
-			}
-		};
-
 		try {
 			// Initialize HKTransportETAProvider if not available
 			if (!window.HKTransportETAProvider) {
 				await this.initializeHKTransportETAProvider();
 			}
 
-			const kmbProvider = window.HKTransportETAProvider.initialize('kmb', {
-				apiBase: 'https://data.etabus.gov.hk/v1/transport/kmb',
-			});
+			const kmbProvider = window.HKTransportETAProvider.initialize('kmb', {});
 
 			// Check if kmbProvider was initialized successfully
 			if (!kmbProvider) {
 				throw new Error('Failed to initialize KMB provider');
 			}
 
-			// Fetch data with retry logic
+			// Fetch data using provider methods where available
 			const [allRoutesData, stopData, allKmbRouteStopData] = await Promise.all([
-				fetchWithRetry(() =>
-					kmbProvider.fetchData(`${kmbProvider.config.apiBase}/route/`)
-				),
-				fetchWithRetry(() =>
-					kmbProvider.fetchData(`${kmbProvider.config.apiBase}/stop/`)
-				),
-				fetchWithRetry(() =>
-					kmbProvider.fetchData(`${kmbProvider.config.apiBase}/route-stop/`)
-				),
+				kmbProvider.fetchRoutes(), // Fetch all routes using provider method
+				kmbProvider.fetchStopData(), // Fetch all stops using provider method
+				kmbProvider.fetchRouteStop(), // Fetch all route-stops using provider method
 			]);
-
-			// Log data structure for debugging
-			console.log('KMB API Data:', {
-				routes: { count: allRoutesData?.data?.length || 0 },
-				stops: { count: stopData?.data?.length || 0 },
-				routeStops: { count: allKmbRouteStopData?.data?.length || 0 },
-			});
 
 			// Validate data structure
 			if (
 				!allRoutesData ||
-				!allRoutesData.data ||
-				!Array.isArray(allRoutesData.data)
+				!Array.isArray(allRoutesData)
 			) {
 				throw new Error('Invalid KMB routes data structure');
 			}
-			if (!stopData || !stopData.data || !Array.isArray(stopData.data)) {
+			if (!stopData || !Array.isArray(stopData)) {
 				throw new Error('Invalid KMB stop data structure');
 			}
 			if (
 				!allKmbRouteStopData ||
-				!allKmbRouteStopData.data ||
-				!Array.isArray(allKmbRouteStopData.data)
+				!Array.isArray(allKmbRouteStopData)
 			) {
 				throw new Error('Invalid KMB route-stop data structure');
 			}
 
 			// Process routes data
 			const kmbRoutesData = {};
-			allRoutesData.data.forEach(route => {
+			allRoutesData.forEach(route => {
 				const routeNumber = route.route;
 				if (!kmbRoutesData[routeNumber]) {
 					kmbRoutesData[routeNumber] = [];
@@ -223,12 +189,12 @@ export class DataService {
 			});
 
 			// Cache stop data globally for components to use
-			window.cachedStopData = stopData.data;
+			window.cachedStopData = stopData;
 
 			const result = {
 				kmbRoutesData,
-				kmbRouteStopData: allKmbRouteStopData.data,
-				stopData: stopData.data,
+				kmbRouteStopData: allKmbRouteStopData,
+				stopData: stopData,
 			};
 
 			this.cache.set(cacheKey, result);
