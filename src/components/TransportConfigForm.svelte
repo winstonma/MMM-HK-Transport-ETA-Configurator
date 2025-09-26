@@ -4,6 +4,7 @@
   import MtrConfigForm from './MtrConfigForm.svelte';
   import MtrbusConfigForm from './MtrbusConfigForm.svelte';
   import CtbConfigForm from './CtbConfigForm.svelte';
+  import GmbConfigForm from './GmbConfigForm.svelte';
   import Toast from './Toast.svelte';
   import { dataService } from '../utils/dataService.js';
   import { 
@@ -15,6 +16,7 @@
     mtrbusRoutesData,
     ctbRoutesData,
     ctbRouteStopsData,
+    gmbRoutesData,
     loading,
     error,
     showAdvanced,
@@ -58,6 +60,9 @@
       } else if ($config.transportETAProvider === "ctb") {
         const ctbData = await dataService.loadCtbData();
         ctbRoutesData.set(ctbData.ctbRoutesData);
+      } else if ($config.transportETAProvider === "gmb") {
+        const gmbData = await dataService.loadGmbData();
+        gmbRoutesData.set(gmbData.gmbRoutesData);
       }
     } catch (err) {
       error.set(`Failed to load initial data: ${err.message}`);
@@ -110,6 +115,16 @@
         ctbRoutesData.set(ctbData.ctbRoutesData);
       } catch (err) {
         error.set(`Failed to load CTB data: ${err.message}`);
+      } finally {
+        loading.set(false);
+      }
+    } else if ($config.transportETAProvider === "gmb" && Object.keys($gmbRoutesData).length === 0) {
+      loading.set(true);
+      try {
+        const gmbData = await dataService.loadGmbData();
+        gmbRoutesData.set(gmbData.gmbRoutesData);
+      } catch (err) {
+        error.set(`Failed to load GMB data: ${err.message}`);
       } finally {
         loading.set(false);
       }
@@ -180,6 +195,7 @@
         <option value="mtr">MTR</option>
         <option value="mtrbus">MTR Bus</option>
         <option value="ctb">CTB</option>
+        <option value="gmb">GMB</option>
       </select>
     </div>
 
@@ -225,6 +241,14 @@
               .finally(() => loading.set(false));
           }
         }}
+      />
+    {:else if $config.transportETAProvider === "gmb"}
+      <GmbConfigForm
+        config={$config}
+        gmbRoutesData={$gmbRoutesData}
+        translations={$translations}
+        currentLanguage="en"
+        on:configChange={(e) => updateConfig(e.detail)}
       />
     {:else}
       <!-- Manual STA input -->

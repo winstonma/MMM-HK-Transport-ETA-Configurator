@@ -33,6 +33,9 @@ export class DataService {
 			labelKmbRoute: 'KMB Route:',
 			labelKmbDirection: 'KMB Direction:',
 			labelKmbStop: 'KMB Stop:',
+			labelArea: 'Area:',
+			labelGmbLine: 'Line:',
+			labelGmbStopId: 'GMB Stop ID:',
 			labelReloadInterval: 'Reload Interval (minutes):',
 			labelUpdateInterval: 'Update Interval (seconds):',
 			labelAnimationSpeed: 'Animation Speed (milliseconds):',
@@ -156,19 +159,13 @@ export class DataService {
 			]);
 
 			// Validate data structure
-			if (
-				!allRoutesData ||
-				!Array.isArray(allRoutesData)
-			) {
+			if (!allRoutesData || !Array.isArray(allRoutesData)) {
 				throw new Error('Invalid KMB routes data structure');
 			}
 			if (!stopData || !Array.isArray(stopData)) {
 				throw new Error('Invalid KMB stop data structure');
 			}
-			if (
-				!allKmbRouteStopData ||
-				!Array.isArray(allKmbRouteStopData)
-			) {
+			if (!allKmbRouteStopData || !Array.isArray(allKmbRouteStopData)) {
 				throw new Error('Invalid KMB route-stop data structure');
 			}
 
@@ -231,6 +228,156 @@ export class DataService {
 		} catch (error) {
 			console.error('Error fetching CTB data:', error);
 			throw new Error(`Failed to load CTB data: ${error.message}`);
+		}
+	}
+
+	async loadGmbData() {
+		const cacheKey = 'gmb-data';
+		if (this.cache.has(cacheKey)) {
+			return this.cache.get(cacheKey);
+		}
+
+		try {
+			// Initialize HKTransportETAProvider if not available
+			if (!window.HKTransportETAProvider) {
+				await this.initializeHKTransportETAProvider();
+			}
+
+			const gmbProvider = window.HKTransportETAProvider.initialize('gmb', {});
+
+			// GMB doesn't have a direct route fetching method in the provider, so we'll return an empty object for now
+			// The actual route data will be fetched when needed based on area from the API
+			const result = {
+				gmbRoutesData: {},
+			};
+
+			this.cache.set(cacheKey, result);
+			return result;
+		} catch (error) {
+			console.error('Error fetching GMB data:', error);
+			throw new Error(`Failed to load GMB data: ${error.message}`);
+		}
+	}
+
+	// Load GMB routes by area
+	async loadGmbRoutesByArea(area) {
+		try {
+			let apiUrl = '';
+			if (area === 'NT') {
+				apiUrl = 'https://data.etagmb.gov.hk/route/NT';
+			} else if (area === 'KLN') {
+				apiUrl = 'https://data.etagmb.gov.hk/route/KLN';
+			} else if (area === 'HK') {
+				apiUrl = 'https://data.etagmb.gov.hk/route/HKI'; // Hong Kong Island uses HKI code
+			} else {
+				throw new Error(`Invalid area: ${area}`);
+			}
+
+			const response = await fetch(apiUrl);
+			if (!response.ok) {
+				throw new Error(
+					`Failed to fetch GMB routes for area ${area}: ${response.status} ${response.statusText}`
+				);
+			}
+
+			const data = await response.json();
+
+			// The API returns routes in data.routes as an array of strings
+			if (data && data.data && Array.isArray(data.data.routes)) {
+				return data.data.routes;
+			} else {
+				console.warn(`Unexpected API response format for area ${area}`, data);
+				// Return an empty array if the expected format is not found
+				return [];
+			}
+		} catch (error) {
+			console.error(`Error fetching GMB routes for area ${area}:`, error);
+			throw new Error(
+				`Failed to load GMB routes for area ${area}: ${error.message}`
+			);
+		}
+	}
+
+	// Load GMB route details by area and route code
+	async loadGmbRouteDetails(area, routeCode) {
+		try {
+			let regionCode = area;
+			// Convert HK to HKI for the API
+			if (area === 'HK') {
+				regionCode = 'HKI';
+			}
+
+			const apiUrl = `https://data.etagmb.gov.hk/route/${regionCode}/${routeCode}`;
+			const response = await fetch(apiUrl);
+			if (!response.ok) {
+				throw new Error(
+					`Failed to fetch GMB route details for route ${routeCode} in area ${area}: ${response.status} ${response.statusText}`
+				);
+			}
+
+			const data = await response.json();
+
+			// The API should return route details with directions and stops
+			if (data && data.data && Array.isArray(data.data)) {
+				return data.data; // This should contain route information including directions and stops
+			} else {
+				console.warn(
+					`Unexpected API response format for route ${routeCode} in area ${area}`,
+					data
+				);
+				return [];
+			}
+		} catch (error) {
+			console.error(
+				`Error fetching GMB route details for route ${routeCode} in area ${area}:`,
+				error
+			);
+			throw new Error(
+				`Failed to load GMB route details for route ${routeCode} in area ${area}: ${error.message}`
+			);
+		}
+	}
+
+	// Get GMB route ID by area and route code
+	async getGmbRouteId(area, routeCode) {
+		try {
+			let regionCode = area;
+			// Convert HK to HKI for the API
+			if (area === 'HK') {
+				regionCode = 'HKI';
+			}
+
+			const apiUrl = `https://data.etagmb.gov.hk/route/${regionCode}/${routeCode}`;
+			const response = await fetch(apiUrl);
+			if (!response.ok) {
+				throw new Error(
+					`Failed to fetch GMB route ID for route ${routeCode} in area ${area}: ${response.status} ${response.statusText}`
+				);
+			}
+
+			const data = await response.json();
+
+			// The API returns route information in data[0] with route_id field
+			if (
+				data &&
+				data.data &&
+				Array.isArray(data.data) &&
+				data.data.length > 0
+			) {
+				return data.data[0].route_id; // Return the route ID
+			} else {
+				throw new Error(
+					`Route ID not found for route ${routeCode} in area ${area}`
+				);
+			}
+		} catch (error) {
+			console.error(
+				`Error fetching GMB route ID for route ${routeCode} in area ${area}:`,
+				error
+			);
+			throw new Error(
+				`Failed to get GMB route ID for route ${routeCode} in area ${area}: ${error.message}`
+			);
 		}
 	}
 

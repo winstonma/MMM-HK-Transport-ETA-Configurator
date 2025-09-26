@@ -6,11 +6,15 @@ import svelte from '@astrojs/svelte';
 // https://astro.build/config
 export default defineConfig({
 	// Only use base path for production builds (GitHub Pages)
-	base: process.env.GITHUB_ACTIONS === 'true' || process.env.NODE_ENV === 'production' ? '/MMM-HK-Transport-ETA-Configurator/' : '/',
+	base:
+		process.env.GITHUB_ACTIONS === 'true' ||
+		process.env.NODE_ENV === 'production'
+			? '/MMM-HK-Transport-ETA-Configurator/'
+			: '/',
 	publicDir: './public',
 	outDir: './dist',
 	integrations: [svelte()],
-	vite: { 
-		plugins: [tailwindcss()] 
+	vite: {
+		plugins: [tailwindcss()],
 	},
 });

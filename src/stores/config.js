@@ -30,6 +30,7 @@ export const kmbRouteStopData = writable([]);
 export const mtrbusRoutesData = writable([]);
 export const ctbRoutesData = writable([]);
 export const ctbRouteStopsData = writable([]);
+export const gmbRoutesData = writable({});
 
 // UI state
 export const loading = writable(false);
@@ -124,6 +125,17 @@ export const jsonOutput = derived(
 					const [route, direction, stopId] = $config.sta.split('-');
 					if (route && direction && stopId) {
 						filteredConfig[key] = stopId; // Show just the stop ID for CTB
+					} else {
+						filteredConfig[key] = $config[key]; // Fallback to raw value
+					}
+				} else if (
+					$config.transportETAProvider === 'gmb' &&
+					$config.sta.includes('-')
+				) {
+					// For GMB, the STA format is {area}-{line}-{stop_id}
+					const [area, line, stopId] = $config.sta.split('-');
+					if (area && line && stopId) {
+						filteredConfig[key] = stopId; // Show just the stop ID for GMB
 					} else {
 						filteredConfig[key] = $config[key]; // Fallback to raw value
 					}
