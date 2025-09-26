@@ -15,17 +15,17 @@
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-free": "^7.0.1",
-		"@tailwindcss/vite": "^4.1.12",
-		"astro": "^5.13.4",
-		"tailwindcss": "^4.1.12"
+		"@tailwindcss/vite": "^4.1.13",
+		"astro": "^5.14.0",
+		"tailwindcss": "^4.1.13"
 	},
 	"devDependencies": {
 		"@astro-github-elements/clipboard-copy": "^0.0.4",
-		"@astrojs/svelte": "^7.1.1",
+		"@astrojs/svelte": "^7.2.0",
 		"prettier": "^3.6.2",
 		"prettier-plugin-astro": "^0.14.1",
-		"prettier-plugin-svelte": "^3.2.8",
-		"svelte": "^5.38.7",
+		"prettier-plugin-svelte": "^3.4.0",
+		"svelte": "^5.39.6",
 		"svelte-preprocess": "^5.1.4"
 	}
 }
