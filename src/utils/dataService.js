@@ -354,7 +354,7 @@ export class DataService {
 					? import.meta.env.BASE_URL
 					: '/';
 
-			const response = await fetch(`${baseUrl}external/data/lrt-stations.json`);
+			const response = await fetch(`${baseUrl}external/data/station-lrt.json`);
 			if (response.ok) {
 				const lrtStationsData = await response.json();
 
