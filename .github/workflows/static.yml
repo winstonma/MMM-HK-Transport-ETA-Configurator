@@ -45,11 +45,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Download provider scripts
-        run: bash scripts/download-providers.sh
-
-      - name: Download data scripts
-        run: bash scripts/download-data.sh
+      - name: Run prebuild
+        run: pnpm run prebuild
 
       - name: Build
         run: pnpm run build
