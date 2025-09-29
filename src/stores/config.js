@@ -31,6 +31,7 @@ export const mtrbusRoutesData = writable([]);
 export const ctbRoutesData = writable([]);
 export const ctbRouteStopsData = writable([]);
 export const gmbRoutesData = writable({});
+export const lrtStationsData = writable({});
 
 // UI state
 export const loading = writable(false);
@@ -64,8 +65,8 @@ export function resetConfig() {
 
 // JSON output derived store
 export const jsonOutput = derived(
-	[config, mtrLinesData, kmbRouteStopData],
-	([$config, $mtrLinesData, $kmbRouteStopData]) => {
+	[config, mtrLinesData, kmbRouteStopData, lrtStationsData],
+	([$config, $mtrLinesData, $kmbRouteStopData, $lrtStationsData]) => {
 		if (!$config.sta) return '';
 
 		const filteredConfig = {};
@@ -136,6 +137,30 @@ export const jsonOutput = derived(
 					const [area, line, stopId] = $config.sta.split('-');
 					if (area && line && stopId) {
 						filteredConfig[key] = stopId; // Show just the stop ID for GMB
+					} else {
+						filteredConfig[key] = $config[key]; // Fallback to raw value
+					}
+				} else if (
+					$config.transportETAProvider === 'lrt'
+				) {
+					// For LRT, the STA format is just the station ID
+					const stationId = $config.sta;
+					if (stationId) {
+						// Find the station across all zones
+						let foundStation = null;
+						for (const zoneData of Object.values($lrtStationsData)) {
+							if (zoneData.stations) {
+								foundStation = zoneData.stations.find(
+									s => s.station_id.toString() === stationId
+								);
+								if (foundStation) break;
+							}
+						}
+						if (foundStation) {
+							filteredConfig[key] = foundStation.eng_name; // Use the English name
+						} else {
+							filteredConfig[key] = stationId; // Fallback to station ID
+						}
 					} else {
 						filteredConfig[key] = $config[key]; // Fallback to raw value
 					}

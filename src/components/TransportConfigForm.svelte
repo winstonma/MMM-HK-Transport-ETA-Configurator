@@ -5,6 +5,7 @@
   import MtrbusConfigForm from './MtrbusConfigForm.svelte';
   import CtbConfigForm from './CtbConfigForm.svelte';
   import GmbConfigForm from './GmbConfigForm.svelte';
+  import LrtConfigForm from './LrtConfigForm.svelte';
   import Toast from './Toast.svelte';
   import { dataService } from '../utils/dataService.js';
   import { 
@@ -17,6 +18,7 @@
     ctbRoutesData,
     ctbRouteStopsData,
     gmbRoutesData,
+    lrtStationsData,
     loading,
     error,
     showAdvanced,
@@ -63,6 +65,9 @@
       } else if ($config.transportETAProvider === "gmb") {
         const gmbData = await dataService.loadGmbData();
         gmbRoutesData.set(gmbData.gmbRoutesData);
+      } else if ($config.transportETAProvider === "lrt") {
+        const lrtData = await dataService.loadLrtStationsData();
+        lrtStationsData.set(lrtData);
       }
     } catch (err) {
       error.set(`Failed to load initial data: ${err.message}`);
@@ -125,6 +130,16 @@
         gmbRoutesData.set(gmbData.gmbRoutesData);
       } catch (err) {
         error.set(`Failed to load GMB data: ${err.message}`);
+      } finally {
+        loading.set(false);
+      }
+    } else if ($config.transportETAProvider === "lrt" && Object.keys($lrtStationsData).length === 0) {
+      loading.set(true);
+      try {
+        const lrtData = await dataService.loadLrtStationsData();
+        lrtStationsData.set(lrtData);
+      } catch (err) {
+        error.set(`Failed to load LRT data: ${err.message}`);
       } finally {
         loading.set(false);
       }
@@ -196,6 +211,7 @@
         <option value="mtrbus">MTR Bus</option>
         <option value="ctb">CTB</option>
         <option value="gmb">GMB</option>
+        <option value="lrt">LRT</option>
       </select>
     </div>
 
@@ -248,6 +264,13 @@
         gmbRoutesData={$gmbRoutesData}
         translations={$translations}
         currentLanguage="en"
+        on:configChange={(e) => updateConfig(e.detail)}
+      />
+    {:else if $config.transportETAProvider === "lrt"}
+      <LrtConfigForm
+        config={$config}
+        lrtStationsData={$lrtStationsData}
+        translations={$translations}
         on:configChange={(e) => updateConfig(e.detail)}
       />
     {:else}
