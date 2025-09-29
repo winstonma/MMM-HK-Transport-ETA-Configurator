@@ -140,9 +140,7 @@ export const jsonOutput = derived(
 					} else {
 						filteredConfig[key] = $config[key]; // Fallback to raw value
 					}
-				} else if (
-					$config.transportETAProvider === 'lrt'
-				) {
+				} else if ($config.transportETAProvider === 'lrt') {
 					// For LRT, the STA format is just the station ID
 					const stationId = $config.sta;
 					if (stationId) {

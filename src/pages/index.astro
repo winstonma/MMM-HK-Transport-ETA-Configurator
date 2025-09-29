@@ -1,33 +1,49 @@
 ---
 // This is the Astro page for the admin UI.
 // It replaces the original config.html.
-import Layout from "../layouts/Layout.astro";
-import TransportConfigForm from "../components/TransportConfigForm.svelte";
+import Layout from '../layouts/Layout.astro';
+import TransportConfigForm from '../components/TransportConfigForm.svelte';
 
 // Default configuration (should match MMM-HK-Transport-ETA.js defaults)
 const defaultModuleConfig = {
-  transportETAProvider: "mtr",
-  sta: "HOK",
-  reloadInterval: 60000, // ms
-  updateInterval: 5000, // ms
-  animationSpeed: 2500,
-  initialLoadDelay: 0,
-  colored: false,
-  showHeader: false,
+	transportETAProvider: 'mtr',
+	sta: 'HOK',
+	reloadInterval: 60000, // ms
+	updateInterval: 5000, // ms
+	animationSpeed: 2500,
+	initialLoadDelay: 0,
+	colored: false,
+	showHeader: false,
 };
 ---
 
 <Layout title="MMM-HK-Transport-ETA Configuration">
-  
-  <TransportConfigForm initialConfig={defaultModuleConfig} client:load />
+	<TransportConfigForm
+		initialConfig={defaultModuleConfig}
+		client:only="svelte"
+	/>
 
-  <!-- Keep provider scripts for API functionality -->
-  <script type="module" src={import.meta.env.BASE_URL + "main.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "external/providers/nwfb.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "external/providers/mtrbus.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "external/providers/lrt.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "external/providers/ctb.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "external/providers/gmb.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "external/providers/mtr.js"}></script>
-  <script type="module" src={import.meta.env.BASE_URL + "external/providers/kmb.js"}></script>
+	<!-- Keep provider scripts for API functionality -->
+	<script type="module" src={import.meta.env.BASE_URL + 'main.js'}></script>
+	<script
+		type="module"
+		src={import.meta.env.BASE_URL + 'external/providers/nwfb.js'}></script>
+	<script
+		type="module"
+		src={import.meta.env.BASE_URL + 'external/providers/mtrbus.js'}></script>
+	<script
+		type="module"
+		src={import.meta.env.BASE_URL + 'external/providers/lrt.js'}></script>
+	<script
+		type="module"
+		src={import.meta.env.BASE_URL + 'external/providers/ctb.js'}></script>
+	<script
+		type="module"
+		src={import.meta.env.BASE_URL + 'external/providers/gmb.js'}></script>
+	<script
+		type="module"
+		src={import.meta.env.BASE_URL + 'external/providers/mtr.js'}></script>
+	<script
+		type="module"
+		src={import.meta.env.BASE_URL + 'external/providers/kmb.js'}></script>
 </Layout>

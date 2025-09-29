@@ -340,43 +340,43 @@ export class DataService {
 	}
 
 	// Load LRT station data
-		async loadLrtStationsData() {
-			const cacheKey = 'lrt-stations';
-			if (this.cache.has(cacheKey)) {
-				return this.cache.get(cacheKey);
-			}
-
-			try {
-				let baseUrl =
-					typeof import.meta !== 'undefined' &&
-					import.meta.env &&
-					import.meta.env.BASE_URL
-						? import.meta.env.BASE_URL
-						: '/';
-
-				const response = await fetch(`${baseUrl}external/data/lrt-stations.json`);
-				if (response.ok) {
-					const lrtStationsData = await response.json();
-					
-					// Transform the data to match the expected format (grouped by zone)
-					const transformedData = {};
-					lrtStationsData.forEach(zoneObj => {
-						const zoneCode = zoneObj.zone;
-						transformedData[zoneCode] = {
-							zone: zoneCode,
-							stations: zoneObj.stations
-						};
-					});
-					
-					this.cache.set(cacheKey, transformedData);
-					return transformedData;
-				}
-			} catch (error) {
-				console.error('Error fetching LRT stations:', error);
-			}
-
-			return {};
+	async loadLrtStationsData() {
+		const cacheKey = 'lrt-stations';
+		if (this.cache.has(cacheKey)) {
+			return this.cache.get(cacheKey);
 		}
+
+		try {
+			let baseUrl =
+				typeof import.meta !== 'undefined' &&
+				import.meta.env &&
+				import.meta.env.BASE_URL
+					? import.meta.env.BASE_URL
+					: '/';
+
+			const response = await fetch(`${baseUrl}external/data/lrt-stations.json`);
+			if (response.ok) {
+				const lrtStationsData = await response.json();
+
+				// Transform the data to match the expected format (grouped by zone)
+				const transformedData = {};
+				lrtStationsData.forEach(zoneObj => {
+					const zoneCode = zoneObj.zone;
+					transformedData[zoneCode] = {
+						zone: zoneCode,
+						stations: zoneObj.stations,
+					};
+				});
+
+				this.cache.set(cacheKey, transformedData);
+				return transformedData;
+			}
+		} catch (error) {
+			console.error('Error fetching LRT stations:', error);
+		}
+
+		return {};
+	}
 
 	// Get GMB route ID by area and route code
 	async getGmbRouteId(area, routeCode) {

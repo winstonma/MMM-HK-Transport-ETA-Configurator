@@ -11,7 +11,9 @@
 		"astro": "astro",
 		"clean": "rm -rf dist public/external",
 		"format": "prettier --write .",
-		"format:check": "prettier --check ."
+		"format:check": "prettier --check .",
+		"format:svelte": "prettier --write \"**/*.svelte\"",
+		"format:svelte:check": "prettier --check \"**/*.svelte\""
 	},
 	"dependencies": {
 		"@fortawesome/fontawesome-free": "^7.0.1",
