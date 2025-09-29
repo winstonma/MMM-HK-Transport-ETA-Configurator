@@ -59,8 +59,8 @@ export class DataService {
 		try {
 			let baseUrl =
 				typeof import.meta !== 'undefined' &&
-					import.meta.env &&
-					import.meta.env.BASE_URL
+				import.meta.env &&
+				import.meta.env.BASE_URL
 					? import.meta.env.BASE_URL
 					: '/';
 
@@ -87,8 +87,8 @@ export class DataService {
 			// Handle both browser and Node.js environments
 			let baseUrl =
 				typeof import.meta !== 'undefined' &&
-					import.meta.env &&
-					import.meta.env.BASE_URL
+				import.meta.env &&
+				import.meta.env.BASE_URL
 					? import.meta.env.BASE_URL
 					: '/';
 
@@ -114,7 +114,12 @@ export class DataService {
 		try {
 			// First try to get route stops from cached allroutes.json data
 			const allRoutesData = this.cache.get('ctb-allroutes');
-			if (allRoutesData && allRoutesData.routes && allRoutesData.routes[route] && allRoutesData.stops) {
+			if (
+				allRoutesData &&
+				allRoutesData.routes &&
+				allRoutesData.routes[route] &&
+				allRoutesData.stops
+			) {
 				const routeData = allRoutesData.routes[route];
 				const routeStopsData = [];
 
@@ -129,7 +134,7 @@ export class DataService {
 							seq: (index + 1).toString(),
 							name_tc: stopInfo.name_tc || null,
 							name_en: stopInfo.name_en || null,
-							name_sc: stopInfo.name_sc || null
+							name_sc: stopInfo.name_sc || null,
 						});
 					});
 				}
@@ -145,7 +150,7 @@ export class DataService {
 							seq: (index + 1).toString(),
 							name_tc: stopInfo.name_tc || null,
 							name_en: stopInfo.name_en || null,
-							name_sc: stopInfo.name_sc || null
+							name_sc: stopInfo.name_sc || null,
 						});
 					});
 				}
@@ -259,40 +264,53 @@ export class DataService {
 
 			// First try to fetch from the allroutes.json URL
 			try {
-				const allRoutesResponse = await fetch("https://winstonma.github.io/MMM-HK-Transport-ETA-Data/ctb/routes/allroutes.json");
+				const allRoutesResponse = await fetch(
+					'https://winstonma.github.io/MMM-HK-Transport-ETA-Data/ctb/routes/allroutes.json'
+				);
 				if (allRoutesResponse.ok) {
 					allRoutesData = await allRoutesResponse.json();
 
 					// Transform the data to match the expected format
 					if (allRoutesData && allRoutesData.routes && allRoutesData.stops) {
 						ctbRoutesData = [];
-						for (const [routeNumber, routeDirections] of Object.entries(allRoutesData.routes)) {
+						for (const [routeNumber, routeDirections] of Object.entries(
+							allRoutesData.routes
+						)) {
 							// Get origin and destination from the first and last stops
-							let orig_tc = "", orig_en = "", orig_sc = "";
-							let dest_tc = "", dest_en = "", dest_sc = "";
+							let orig_tc = '',
+								orig_en = '',
+								orig_sc = '';
+							let dest_tc = '',
+								dest_en = '',
+								dest_sc = '';
 
 							// Use outbound direction to determine origin and destination
-							if (routeDirections.O && Array.isArray(routeDirections.O) && routeDirections.O.length > 0) {
+							if (
+								routeDirections.O &&
+								Array.isArray(routeDirections.O) &&
+								routeDirections.O.length > 0
+							) {
 								const originStopId = routeDirections.O[0];
-								const destStopId = routeDirections.O[routeDirections.O.length - 1];
+								const destStopId =
+									routeDirections.O[routeDirections.O.length - 1];
 
 								// Get origin stop names
 								if (allRoutesData.stops[originStopId]) {
-									orig_tc = allRoutesData.stops[originStopId].name_tc || "";
-									orig_en = allRoutesData.stops[originStopId].name_en || "";
-									orig_sc = allRoutesData.stops[originStopId].name_sc || "";
+									orig_tc = allRoutesData.stops[originStopId].name_tc || '';
+									orig_en = allRoutesData.stops[originStopId].name_en || '';
+									orig_sc = allRoutesData.stops[originStopId].name_sc || '';
 								}
 
 								// Get destination stop names
 								if (allRoutesData.stops[destStopId]) {
-									dest_tc = allRoutesData.stops[destStopId].name_tc || "";
-									dest_en = allRoutesData.stops[destStopId].name_en || "";
-									dest_sc = allRoutesData.stops[destStopId].name_sc || "";
+									dest_tc = allRoutesData.stops[destStopId].name_tc || '';
+									dest_en = allRoutesData.stops[destStopId].name_en || '';
+									dest_sc = allRoutesData.stops[destStopId].name_sc || '';
 								}
 							}
 
 							const routeObj = {
-								co: "CTB",
+								co: 'CTB',
 								route: routeNumber,
 								orig_tc: orig_tc,
 								orig_en: orig_en,
@@ -300,7 +318,7 @@ export class DataService {
 								dest_en: dest_en,
 								orig_sc: orig_sc,
 								dest_sc: dest_sc,
-								data_timestamp: new Date().toISOString()
+								data_timestamp: new Date().toISOString(),
 							};
 							ctbRoutesData.push(routeObj);
 						}
@@ -453,8 +471,8 @@ export class DataService {
 		try {
 			let baseUrl =
 				typeof import.meta !== 'undefined' &&
-					import.meta.env &&
-					import.meta.env.BASE_URL
+				import.meta.env &&
+				import.meta.env.BASE_URL
 					? import.meta.env.BASE_URL
 					: '/';
 
