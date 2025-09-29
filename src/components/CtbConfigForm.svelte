@@ -1,12 +1,7 @@
 <script>
-	import { createEventDispatcher } from 'svelte';
-	import BaseConfigForm from './shared/BaseConfigForm.svelte';
-	import {
-		createOption,
-		parseStationId,
-		buildStationId,
-		sortRoutes,
-	} from '../utils/configHelpers.js';
+	import { onMount, createEventDispatcher } from 'svelte';
+	import FormField from './shared/FormField.svelte';
+	import { createOption, sortRoutes } from '../utils/configHelpers.js';
 
 	const dispatch = createEventDispatcher();
 
@@ -15,6 +10,10 @@
 	export let ctbRouteStopsData = [];
 	export let translations = {};
 	export let currentLanguage = 'en';
+
+	let selectedRoute = '';
+	let selectedDirection = '';
+	let selectedStop = '';
 
 	function getStopName(stop, language) {
 		if (language === 'tc') {
@@ -43,143 +42,153 @@
 		);
 	}
 
-	function getDirections(route, routeStopsData, routesData) {
-		if (!route || !routeStopsData.length || !routesData.length) return [];
+	// Computed routes array
+	$: routes = sortRoutes(ctbRoutesData.map(route => route.route)).map(route =>
+		createOption(route, route)
+	);
 
-		const routeInfo = routesData.find(r => r.route === route);
-		const directions = [];
+	// Computed directions array
+	$: directions =
+		selectedRoute && ctbRouteStopsData.length > 0 && ctbRoutesData.length > 0
+			? (() => {
+					const routeInfo = ctbRoutesData.find(r => r.route === selectedRoute);
+					const dirs = [];
 
-		if (routeStopsData.some(stop => stop.direction === 'outbound')) {
-			const text = routeInfo
-				? `${routeInfo.orig_en || 'Origin'} → ${routeInfo.dest_en || 'Destination'}`
-				: 'Outbound';
-			const title = routeInfo
-				? `Outbound: ${routeInfo.orig_en || 'Origin'} to ${routeInfo.dest_en || 'Destination'}`
-				: 'Outbound direction';
-			directions.push(createOption('outbound', text, title));
+					if (ctbRouteStopsData.some(stop => stop.direction === 'outbound')) {
+						const text = routeInfo
+							? `${routeInfo.orig_en || 'Origin'} → ${routeInfo.dest_en || 'Destination'}`
+							: 'Outbound';
+						const title = routeInfo
+							? `Outbound: ${routeInfo.orig_en || 'Origin'} to ${routeInfo.dest_en || 'Destination'}`
+							: 'Outbound direction';
+						dirs.push(createOption('outbound', text, title));
+					}
+
+					if (ctbRouteStopsData.some(stop => stop.direction === 'inbound')) {
+						const text = routeInfo
+							? `${routeInfo.dest_en || 'Destination'} → ${routeInfo.orig_en || 'Origin'}`
+							: 'Inbound';
+						const title = routeInfo
+							? `Inbound: ${routeInfo.dest_en || 'Destination'} to ${routeInfo.orig_en || 'Origin'}`
+							: 'Inbound direction';
+						dirs.push(createOption('inbound', text, title));
+					}
+
+					return dirs;
+				})()
+			: [];
+
+	// Computed stops array
+	$: stops =
+		selectedRoute && selectedDirection && ctbRouteStopsData.length > 0
+			? ctbRouteStopsData
+					.filter(
+						stop =>
+							stop.route === selectedRoute &&
+							stop.direction === selectedDirection
+					)
+					.sort((a, b) => parseInt(a.seq) - parseInt(b.seq))
+					.map(stop => {
+						const stopName = getStopName(stop, currentLanguage);
+						return createOption(
+							stop.stop,
+							`${stop.seq}. ${stopName}`,
+							`${stopName} (Stop ID: ${stop.stop}, Sequence: ${stop.seq})`
+						);
+					})
+			: [];
+
+	// Update config when selections change
+	$: if (selectedRoute && selectedDirection && selectedStop) {
+		const newSta = `${selectedRoute}-${selectedDirection}-${selectedStop}`;
+		if (config.sta !== newSta) {
+			dispatch('configChange', { sta: newSta, lang: currentLanguage });
 		}
-
-		if (routeStopsData.some(stop => stop.direction === 'inbound')) {
-			const text = routeInfo
-				? `${routeInfo.dest_en || 'Destination'} → ${routeInfo.orig_en || 'Origin'}`
-				: 'Inbound';
-			const title = routeInfo
-				? `Inbound: ${routeInfo.dest_en || 'Destination'} to ${routeInfo.orig_en || 'Origin'}`
-				: 'Inbound direction';
-			directions.push(createOption('inbound', text, title));
+	} else if (selectedRoute && !selectedDirection && !selectedStop) {
+		// If only route is selected, update config.sta to just the route
+		if (config.sta !== selectedRoute) {
+			dispatch('configChange', { sta: selectedRoute, lang: currentLanguage });
 		}
-
-		return directions;
 	}
 
-	function getStops(route, direction, routeStopsData, language) {
-		if (!route || !direction || !routeStopsData.length) return [];
-
-		return routeStopsData
-			.filter(stop => stop.route === route && stop.direction === direction)
-			.sort((a, b) => parseInt(a.seq) - parseInt(b.seq))
-			.map(stop => {
-				const stopName = getStopName(stop, language);
-				return createOption(
-					stop.stop,
-					`${stop.seq}. ${stopName}`,
-					`${stopName} (Stop ID: ${stop.stop}, Sequence: ${stop.seq})`
-				);
-			});
-	}
-
-	// Field configuration
-	$: fields = [
-		{
-			id: 'route',
-			labelKey: 'labelCtbRoute',
-			label: 'CTB Route:',
-			placeholder: '-- Select Route --',
-			options: sortRoutes(ctbRoutesData.map(route => route.route)).map(route =>
-				createOption(route, route)
-			),
-		},
-		{
-			id: 'direction',
-			labelKey: 'labelCtbDirection',
-			label: 'Direction:',
-			placeholder: '-- Select Direction --',
-			disabled: selections => !selections.route,
-			options: selections =>
-				getDirections(selections.route, ctbRouteStopsData, ctbRoutesData),
-		},
-		{
-			id: 'stop',
-			labelKey: 'labelCtbStop',
-			label: 'Stop:',
-			placeholder: '-- Select Stop --',
-			disabled: selections => !selections.route || !selections.direction,
-			options: selections =>
-				getStops(
-					selections.route,
-					selections.direction,
-					ctbRouteStopsData,
-					currentLanguage
-				),
-		},
-	];
-
-	function initializeFromConfig(config) {
+	// Initialize from existing config
+	onMount(() => {
 		if (config.sta) {
-			const parts = parseStationId(config.sta);
-			if (parts.length === 3) {
-				return { route: parts[0], direction: parts[1], stop: parts[2] };
-			} else if (parts.length === 1) {
-				return { route: parts[0], direction: '', stop: '' };
+			const staParts = config.sta.split('-');
+			if (staParts.length === 3) {
+				const [route, direction, stopId] = staParts;
+				selectedRoute = route;
+				selectedDirection = direction;
+				selectedStop = stopId;
+			} else if (staParts.length === 1) {
+				selectedRoute = staParts[0];
 			}
 		}
-		return { route: '', direction: '', stop: '' };
+	});
+
+	// Handle route selection
+	function handleRouteChange(newRoute) {
+		selectedRoute = newRoute;
+		selectedDirection = '';
+		selectedStop = '';
+
+		// Emit route selected event for parent to load route stops data
+		if (newRoute) {
+			dispatch('routeSelected', { route: newRoute });
+		}
 	}
 
-	function onSelectionChange(selections, changedField) {
-		if (changedField === 'route') {
-			// Emit route selected event for parent to load route stops data
-			dispatch('routeSelected', { route: selections.route });
-			selections.direction = '';
-			selections.stop = '';
-		} else if (changedField === 'direction') {
-			selections.stop = '';
-
-			// Auto-select first stop if available
-			const stops = getStops(
-				selections.route,
-				selections.direction,
-				ctbRouteStopsData,
-				currentLanguage
-			);
-			if (stops.length > 0) {
-				selections.stop = stops[0].value;
-			}
-		}
-		return selections;
+	// Auto-select first direction if available
+	$: if (directions.length > 0 && selectedDirection === '') {
+		selectedDirection = directions[0].value;
 	}
 
-	function buildConfigValue(selections) {
-		if (selections.route && selections.direction && selections.stop) {
-			return buildStationId([
-				selections.route,
-				selections.direction,
-				selections.stop,
-			]);
-		} else if (selections.route && !selections.direction && !selections.stop) {
-			return selections.route;
+	// Auto-select first stop when direction changes
+	$: if (selectedDirection && stops.length > 0 && !selectedStop) {
+		selectedStop = stops[0].value;
+	}
+
+	// Reset stop when direction changes and current stop is not valid
+	$: if (selectedDirection && stops.length > 0) {
+		const currentStopIsValid = stops.some(s => s.value === selectedStop);
+		if (!currentStopIsValid) {
+			selectedStop = stops[0].value;
 		}
-		return null;
+	} else if (selectedDirection && stops.length === 0) {
+		selectedStop = '';
 	}
 </script>
 
-<BaseConfigForm
-	{config}
-	{translations}
-	{fields}
-	{initializeFromConfig}
-	{onSelectionChange}
-	{buildConfigValue}
-	on:configChange
-	on:routeSelected
-/>
+<div class="space-y-4">
+	<!-- CTB Route Selection -->
+	<FormField
+		id="ctbRouteSelect"
+		label={translations.labelCtbRoute || 'CTB Route:'}
+		value={selectedRoute}
+		options={routes}
+		placeholder="-- Select Route --"
+		on:change={e => handleRouteChange(e.detail)}
+	/>
+
+	<!-- CTB Direction Selection -->
+	<FormField
+		id="ctbDirection"
+		label={translations.labelCtbDirection || 'Direction:'}
+		value={selectedDirection}
+		options={directions}
+		placeholder="-- Select Direction --"
+		disabled={!selectedRoute}
+		on:change={e => (selectedDirection = e.detail)}
+	/>
+
+	<!-- CTB Stop Selection -->
+	<FormField
+		id="ctbStop"
+		label={translations.labelCtbStop || 'Stop:'}
+		value={selectedStop}
+		options={stops}
+		placeholder="-- Select Stop --"
+		disabled={!selectedRoute || !selectedDirection}
+		on:change={e => (selectedStop = e.detail)}
+	/>
+</div>

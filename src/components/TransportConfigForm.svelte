@@ -1,9 +1,9 @@
 <script>
 	import { onMount } from 'svelte';
 	import KmbConfigForm from './KmbConfigForm.svelte';
-	import MtrConfigForm from './MtrConfigFormSimple.svelte';
+	import MtrConfigForm from './MtrConfigForm.svelte';
 	import MtrbusConfigForm from './MtrbusConfigForm.svelte';
-	import CtbConfigForm from './CtbConfigFormSimple.svelte';
+	import CtbConfigForm from './CtbConfigForm.svelte';
 	import GmbConfigForm from './GmbConfigForm.svelte';
 	import LrtConfigForm from './LrtConfigForm.svelte';
 	import Toast from './Toast.svelte';

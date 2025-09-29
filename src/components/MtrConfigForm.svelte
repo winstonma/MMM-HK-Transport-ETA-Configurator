@@ -1,94 +1,90 @@
 <script>
-	import BaseConfigForm from './shared/BaseConfigForm.svelte';
-	import {
-		createOption,
-		parseStationId,
-		buildStationId,
-		findValidSelection,
-	} from '../utils/configHelpers.js';
+	import { onMount, createEventDispatcher } from 'svelte';
+	import FormField from './shared/FormField.svelte';
+	import { createOption } from '../utils/configHelpers.js';
+
+	const dispatch = createEventDispatcher();
 
 	export let config;
 	export let mtrLinesData;
 	export let translations;
 
-	// Field configuration
-	$: fields = [
-		{
-			id: 'line',
-			labelKey: 'labelMtrLine',
-			label: 'MTR Line:',
-			placeholder: '-- Select Line --',
-			options: Object.keys(mtrLinesData || {}).map(lineCode =>
-				createOption(lineCode, mtrLinesData[lineCode]?.en || lineCode)
-			),
-		},
-		{
-			id: 'station',
-			labelKey: 'labelMtrStation',
-			label: 'MTR Station:',
-			placeholder: '-- Select Station --',
-			disabled: selections => !selections.line,
-			options: selections => {
-				if (!selections.line || !mtrLinesData[selections.line]) return [];
-				return (mtrLinesData[selections.line].stations || []).map(station =>
+	let selectedLine = '';
+	let selectedStation = '';
+
+	// Computed lines array
+	$: lines = Object.keys(mtrLinesData || {}).map(lineCode =>
+		createOption(lineCode, mtrLinesData[lineCode]?.en || lineCode)
+	);
+
+	// Computed stations array
+	$: stations =
+		selectedLine && mtrLinesData[selectedLine]
+			? (mtrLinesData[selectedLine].stations || []).map(station =>
 					createOption(station.code, station.en)
-				);
-			},
-		},
-	];
+				)
+			: [];
 
-	function initializeFromConfig(config) {
+	// Update config when selections change
+	$: if (selectedLine && selectedStation) {
+		const newSta = `${selectedLine}-${selectedStation}`;
+		if (config.sta !== newSta) {
+			dispatch('configChange', { sta: newSta });
+		}
+	}
+
+	// Initialize from existing config
+	onMount(() => {
 		if (config.sta && config.sta.includes('-')) {
-			const [line, station] = parseStationId(config.sta);
-			return { line: line || '', station: station || '' };
+			const [line, station] = config.sta.split('-');
+			selectedLine = line || '';
+			selectedStation = station || '';
+		} else if (lines.length > 0) {
+			selectedLine = lines[0].value;
 		}
+	});
 
-		// Auto-select first line if available
-		const lines = Object.keys(mtrLinesData || {});
-		const selectedLine = lines.length > 0 ? lines[0] : '';
-		let selectedStation = '';
-
-		// Auto-select first station if line is available
-		if (selectedLine && mtrLinesData[selectedLine]?.stations?.length > 0) {
-			selectedStation = mtrLinesData[selectedLine].stations[0].code;
-		}
-
-		return {
-			line: selectedLine,
-			station: selectedStation,
-		};
+	// Auto-select first line if none selected and lines are available
+	$: if (lines.length > 0 && !selectedLine) {
+		selectedLine = lines[0].value;
 	}
 
-	function onSelectionChange(selections, changedField) {
-		// Reset station when line changes
-		if (changedField === 'line') {
-			selections.station = '';
-
-			// Auto-select first station if available
-			if (
-				selections.line &&
-				mtrLinesData[selections.line]?.stations?.length > 0
-			) {
-				selections.station = mtrLinesData[selections.line].stations[0].code;
-			}
-		}
-		return selections;
+	// Auto-select first station when line changes
+	$: if (selectedLine && stations.length > 0 && !selectedStation) {
+		selectedStation = stations[0].value;
 	}
 
-	function buildConfigValue(selections) {
-		if (selections.line && selections.station) {
-			return buildStationId([selections.line, selections.station]);
+	// Reset station when line changes
+	$: if (selectedLine) {
+		// Check if current station is valid for the new line
+		const isValidStation = stations.some(s => s.value === selectedStation);
+		if (!isValidStation && stations.length > 0) {
+			selectedStation = stations[0].value;
+		} else if (stations.length === 0) {
+			selectedStation = '';
 		}
-		return null;
 	}
 </script>
 
-<BaseConfigForm
-	{config}
-	{translations}
-	{fields}
-	{initializeFromConfig}
-	{onSelectionChange}
-	{buildConfigValue}
-	on:configChange
-/>
+<div class="space-y-4">
+	<!-- MTR Line Selection -->
+	<FormField
+		id="mtrLine"
+		label={translations.labelMtrLine || 'MTR Line:'}
+		value={selectedLine}
+		options={lines}
+		placeholder="-- Select Line --"
+		on:change={e => (selectedLine = e.detail)}
+	/>
+
+	<!-- MTR Station Selection -->
+	<FormField
+		id="mtrStation"
+		label={translations.labelMtrStation || 'MTR Station:'}
+		value={selectedStation}
+		options={stations}
+		placeholder="-- Select Station --"
+		disabled={!selectedLine}
+		on:change={e => (selectedStation = e.detail)}
+	/>
+</div>
