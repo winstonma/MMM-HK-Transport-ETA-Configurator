@@ -139,8 +139,18 @@
 	}
 
 	// Auto-select first direction if available
-	$: if (directions.length > 0 && selectedDirection === '') {
+	$: if (directions.length > 0 && !selectedDirection) {
 		selectedDirection = directions[0].value;
+	}
+
+	// Reset direction if current selection is not valid
+	$: if (selectedDirection && directions.length > 0) {
+		const currentDirectionIsValid = directions.some(
+			d => d.value === selectedDirection
+		);
+		if (!currentDirectionIsValid) {
+			selectedDirection = directions[0].value;
+		}
 	}
 
 	// Auto-select first stop when direction changes

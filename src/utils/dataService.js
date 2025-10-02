@@ -129,6 +129,9 @@ export class DataService {
 
 					// Check if it's an object with a 'stops' property (current structure)
 					if (directionData.stops && Array.isArray(directionData.stops)) {
+						// Skip if stops array is empty
+						if (directionData.stops.length === 0) return;
+
 						// Current structure: { stops: [...], orig_tc: ..., dest_tc: ... }
 						directionData.stops.forEach((stopId, index) => {
 							const stopInfo = allRoutesData.stops[stopId] || {};
