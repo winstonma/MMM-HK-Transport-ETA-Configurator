@@ -123,36 +123,71 @@ export class DataService {
 				const routeData = allRoutesData.routes[route];
 				const routeStopsData = [];
 
-				// Add outbound stops
-				if (routeData.O && Array.isArray(routeData.O)) {
-					routeData.O.forEach((stopId, index) => {
-						const stopInfo = allRoutesData.stops[stopId] || {};
-						routeStopsData.push({
-							route: route,
-							direction: 'outbound',
-							stop: stopId,
-							seq: (index + 1).toString(),
-							name_tc: stopInfo.name_tc || null,
-							name_en: stopInfo.name_en || null,
-							name_sc: stopInfo.name_sc || null,
-						});
-					});
-				}
+				// Helper function to process stops for a direction
+				const processDirection = (directionData, directionName) => {
+					if (!directionData) return;
 
-				// Add inbound stops
-				if (routeData.I && Array.isArray(routeData.I)) {
-					routeData.I.forEach((stopId, index) => {
-						const stopInfo = allRoutesData.stops[stopId] || {};
-						routeStopsData.push({
-							route: route,
-							direction: 'inbound',
-							stop: stopId,
-							seq: (index + 1).toString(),
-							name_tc: stopInfo.name_tc || null,
-							name_en: stopInfo.name_en || null,
-							name_sc: stopInfo.name_sc || null,
+					// Check if it's an object with a 'stops' property (current structure)
+					if (directionData.stops && Array.isArray(directionData.stops)) {
+						// Current structure: { stops: [...], orig_tc: ..., dest_tc: ... }
+						directionData.stops.forEach((stopId, index) => {
+							const stopInfo = allRoutesData.stops[stopId] || {};
+							routeStopsData.push({
+								route: route,
+								direction: directionName,
+								stop: stopId,
+								seq: (index + 1).toString(),
+								name_tc: stopInfo.name_tc || null,
+								name_en: stopInfo.name_en || null,
+								name_sc: stopInfo.name_sc || null,
+							});
 						});
-					});
+					} else if (
+						typeof directionData === 'object' &&
+						!Array.isArray(directionData)
+					) {
+						// Previous structure with service types: { "1": { stops: [...] }, "2": {...} }
+						for (const serviceType in directionData) {
+							const serviceData = directionData[serviceType];
+							if (serviceData.stops && Array.isArray(serviceData.stops)) {
+								serviceData.stops.forEach((stopId, index) => {
+									const stopInfo = allRoutesData.stops[stopId] || {};
+									routeStopsData.push({
+										route: route,
+										direction: directionName,
+										stop: stopId,
+										seq: (index + 1).toString(),
+										name_tc: stopInfo.name_tc || null,
+										name_en: stopInfo.name_en || null,
+										name_sc: stopInfo.name_sc || null,
+										service_type: serviceType,
+									});
+								});
+							}
+						}
+					} else if (Array.isArray(directionData)) {
+						// Oldest structure: direct array of stop IDs
+						directionData.forEach((stopId, index) => {
+							const stopInfo = allRoutesData.stops[stopId] || {};
+							routeStopsData.push({
+								route: route,
+								direction: directionName,
+								stop: stopId,
+								seq: (index + 1).toString(),
+								name_tc: stopInfo.name_tc || null,
+								name_en: stopInfo.name_en || null,
+								name_sc: stopInfo.name_sc || null,
+							});
+						});
+					}
+				};
+
+				// Process outbound and inbound directions
+				if (routeData.O) {
+					processDirection(routeData.O, 'outbound');
+				}
+				if (routeData.I) {
+					processDirection(routeData.I, 'inbound');
 				}
 
 				this.cache.set(cacheKey, routeStopsData);
@@ -284,12 +319,41 @@ export class DataService {
 								dest_en = '',
 								dest_sc = '';
 
-							// Use outbound direction to determine origin and destination
+							// Check if it's the current structure (object with stops property)
 							if (
+								routeDirections.O &&
+								routeDirections.O.stops &&
+								Array.isArray(routeDirections.O.stops)
+							) {
+								// Current structure: { stops: [...], orig_tc: ..., dest_tc: ... }
+								orig_tc = routeDirections.O.orig_tc || '';
+								orig_en = routeDirections.O.orig_en || '';
+								orig_sc = routeDirections.O.orig_sc || '';
+								dest_tc = routeDirections.O.dest_tc || '';
+								dest_en = routeDirections.O.dest_en || '';
+								dest_sc = routeDirections.O.dest_sc || '';
+							} else if (
+								routeDirections.O &&
+								typeof routeDirections.O === 'object' &&
+								!Array.isArray(routeDirections.O)
+							) {
+								// Previous structure with service types: { "1": { stops: [...], orig_tc: ... }, "2": {...} }
+								const firstServiceType = Object.keys(routeDirections.O)[0];
+								if (firstServiceType && routeDirections.O[firstServiceType]) {
+									const serviceData = routeDirections.O[firstServiceType];
+									orig_tc = serviceData.orig_tc || '';
+									orig_en = serviceData.orig_en || '';
+									orig_sc = serviceData.orig_sc || '';
+									dest_tc = serviceData.dest_tc || '';
+									dest_en = serviceData.dest_en || '';
+									dest_sc = serviceData.dest_sc || '';
+								}
+							} else if (
 								routeDirections.O &&
 								Array.isArray(routeDirections.O) &&
 								routeDirections.O.length > 0
 							) {
+								// Oldest structure: direct array of stop IDs
 								const originStopId = routeDirections.O[0];
 								const destStopId =
 									routeDirections.O[routeDirections.O.length - 1];
