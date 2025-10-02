@@ -223,24 +223,118 @@ export class DataService {
 		}
 
 		try {
-			// Initialize HKTransportETAProvider if not available
-			if (!window.HKTransportETAProvider) {
-				await this.initializeHKTransportETAProvider();
+			let allRoutesData = null;
+			let stopData = null;
+			let allKmbRouteStopData = null;
+
+			// First try to fetch from the allroutes.json URL
+			try {
+				const allRoutesResponse = await fetch(
+					'https://winstonma.github.io/MMM-HK-Transport-ETA-Data/kmb/routes/allroutes.json'
+				);
+				if (allRoutesResponse.ok) {
+					const allRoutesJson = await allRoutesResponse.json();
+
+					// Transform the data structure if needed
+					if (allRoutesJson && allRoutesJson.routes) {
+						// Convert routes object to array format and build route-stop data
+						allRoutesData = [];
+						allKmbRouteStopData = [];
+
+						for (const [routeNumber, directions] of Object.entries(
+							allRoutesJson.routes
+						)) {
+							// Handle both I (inbound) and O (outbound) directions
+							for (const [direction, serviceTypes] of Object.entries(
+								directions
+							)) {
+								// direction is 'I' or 'O'
+								const bound = direction === 'O' ? 'outbound' : 'inbound';
+
+								// serviceTypes is an object like { "1": { stops: [...], orig_tc: ... } }
+								for (const [serviceType, serviceData] of Object.entries(
+									serviceTypes
+								)) {
+									// Add to routes data
+									allRoutesData.push({
+										route: routeNumber,
+										bound: bound,
+										service_type: serviceType,
+										orig_en: serviceData.orig_en || '',
+										dest_en: serviceData.dest_en || '',
+										orig_tc: serviceData.orig_tc || '',
+										dest_tc: serviceData.dest_tc || '',
+										orig_sc: serviceData.orig_sc || '',
+										dest_sc: serviceData.dest_sc || '',
+									});
+
+									// Build route-stop data from stops array
+									if (serviceData.stops && Array.isArray(serviceData.stops)) {
+										serviceData.stops.forEach((stopId, index) => {
+											allKmbRouteStopData.push({
+												route: routeNumber,
+												bound: bound,
+												service_type: serviceType,
+												seq: index + 1,
+												stop: stopId,
+											});
+										});
+									}
+								}
+							}
+						}
+
+						// Get stops data if available - convert from object to array
+						if (allRoutesJson.stops) {
+							stopData = Object.entries(allRoutesJson.stops).map(
+								([stopId, stopInfo]) => ({
+									stop: stopId,
+									name_en: stopInfo.name_en || '',
+									name_tc: stopInfo.name_tc || '',
+									name_sc: stopInfo.name_sc || '',
+									lat: stopInfo.lat || '',
+									long: stopInfo.long || '',
+								})
+							);
+						}
+					}
+				}
+			} catch (fetchError) {
+				console.warn(
+					'Failed to fetch from allroutes.json, falling back to provider:',
+					fetchError
+				);
 			}
 
-			const kmbProvider = window.HKTransportETAProvider.initialize('kmb', {});
+			// Fallback to kmbProvider if the primary fetch failed or returned no data
+			if (
+				!allRoutesData ||
+				allRoutesData.length === 0 ||
+				!stopData ||
+				!allKmbRouteStopData
+			) {
+				console.log('Using KMB provider fallback...');
+				// Initialize HKTransportETAProvider if not available
+				if (!window.HKTransportETAProvider) {
+					await this.initializeHKTransportETAProvider();
+				}
 
-			// Check if kmbProvider was initialized successfully
-			if (!kmbProvider) {
-				throw new Error('Failed to initialize KMB provider');
+				const kmbProvider = window.HKTransportETAProvider.initialize('kmb', {});
+
+				// Check if kmbProvider was initialized successfully
+				if (!kmbProvider) {
+					throw new Error('Failed to initialize KMB provider');
+				}
+
+				// Fetch data using provider methods where available
+				[allRoutesData, stopData, allKmbRouteStopData] = await Promise.all([
+					kmbProvider.fetchRoutes(), // Fetch all routes using provider method
+					kmbProvider.fetchStopData(), // Fetch all stops using provider method
+					kmbProvider.fetchRouteStop(), // Fetch all route-stops using provider method
+				]);
+			} else {
+				console.log('Successfully loaded KMB data from allroutes.json');
 			}
-
-			// Fetch data using provider methods where available
-			const [allRoutesData, stopData, allKmbRouteStopData] = await Promise.all([
-				kmbProvider.fetchRoutes(), // Fetch all routes using provider method
-				kmbProvider.fetchStopData(), // Fetch all stops using provider method
-				kmbProvider.fetchRouteStop(), // Fetch all route-stops using provider method
-			]);
 
 			// Validate data structure
 			if (!allRoutesData || !Array.isArray(allRoutesData)) {
