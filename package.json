@@ -16,7 +16,6 @@
 		"format:svelte:check": "prettier --check \"**/*.svelte\""
 	},
 	"dependencies": {
-		"@fortawesome/fontawesome-free": "^7.0.1",
 		"@tailwindcss/vite": "^4.1.13",
 		"astro": "^5.14.0",
 		"tailwindcss": "^4.1.13"

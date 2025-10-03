@@ -328,7 +328,19 @@
 			on:click={() => showAdvanced.update(v => !v)}
 		>
 			<span>{$translations.advancedSettingsText || 'Advanced Settings'}</span>
-			<i class="fas fa-chevron-{$showAdvanced ? 'up' : 'down'}"></i>
+			<svg
+				class="w-4 h-4 transition-transform {$showAdvanced ? 'rotate-180' : ''}"
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M19 9l-7 7-7-7"
+				/>
+			</svg>
 		</button>
 
 		{#if $showAdvanced}
@@ -456,7 +468,19 @@
 				aria-label="Copy configuration to clipboard"
 				disabled={!$jsonOutput}
 			>
-				<i class="fas fa-copy"></i>
+				<svg
+					class="w-5 h-5"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+					/>
+				</svg>
 			</button>
 		</div>
 	</div>
